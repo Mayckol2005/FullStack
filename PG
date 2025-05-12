@@ -1,0 +1,76 @@
+import pyodbc
+
+def obtener_videojuegos():
+    try:
+        # Conexión a SQL Server
+        conn = pyodbc.connect(
+            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'SERVER=W607-PC14\SQLEXPRESS;'
+            'DATABASE=PuertoGames;'
+            'Trusted_Connection=yes;'
+        )
+
+        # Cursor para ejecutar las consultas
+        cursor = conn.cursor()
+
+        # Consulta JOIN
+        cursor.execute("""
+            SELECT v.Nombre, v.Genero, v.Precio, p.Nombre AS Plataforma
+            FROM Videojuego v
+            JOIN Plataforma p ON v.IDPlataforma = p.IDPlataforma
+        """)
+
+        # Recupera todos los registros y los guarda en una lista
+        resultados = cursor.fetchall()
+
+        return resultados
+
+    except pyodbc.Error as e:
+        print("Error al conectar a la base de datos:", e)
+        return []
+
+    finally:
+        # Asegura que la conexión se cierre
+        if 'conn' in locals():
+            conn.close()
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+import tkinter as tk
+from conexion_sqlserver import obtener_videojuegos
+
+# Obtener datos de la base de datos
+datos = obtener_videojuegos()
+
+# Crear una ventana
+ventana = tk.Tk()
+ventana.title("Catálogo de Videojuegos")
+ventana.geometry("700x400")
+
+# Título
+titulo = tk.Label(
+    ventana,
+    text="🎮 Listado de Videojuegos 🎮",
+    font=("Arial", 16, "bold")
+)
+titulo.pack(pady=10)
+
+# Área de texto
+texto = tk.Text(ventana, height=15, width=70, font=("Courier", 10))
+texto.pack()
+
+# Mostrar los datos
+for row in datos:
+    nombre, genero, precio, plataforma = row
+    # Asegurando que la línea no exceda los 79 caracteres
+    texto.insert(
+        tk.END,
+        f"{nombre:25} | {genero:15} | ${precio:8.2f} | {plataforma}\n"
+    )
+
+# Botón de cierre
+cerrar_btn = tk.Button(ventana, text="Cerrar", command=ventana.destroy)
+cerrar_btn.pack(pady=10)
+
+# Ejecutar la interfaz
+ventana.mainloop()
