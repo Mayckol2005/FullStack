@@ -1,0 +1,14 @@
+pyodbc
+tk
+
+def insertar_juego(conn,titulo, precio, stock, id_plataforma):
+    cur = pyodbc.connect()
+    sql = '''INSERT INTO Videojuegos (TITULO, PRECIO, STOCK, ID_PLATAFORMA)
+        VALUES('{}','{}','{}','{}')'''.format(titulo, precio, stock, id_plataforma)
+    cur.execute(sql)
+    conn.commit()
+    cur.close()
+    
+    dts = cur.fetchall()
+    
+    return dts
